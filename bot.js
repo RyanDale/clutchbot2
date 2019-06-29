@@ -1,3 +1,4 @@
+const Mixpanel = require('mixpanel');
 const { Botkit } = require('botkit');
 const { BotkitCMSHelper } = require('botkit-plugin-cms');
 
@@ -13,6 +14,8 @@ if (process.env.MONGO_URI) {
         url: process.env.MONGO_URI,
     });
 }
+
+global.mixpanel = Mixpanel.init(process.env.MIXPANEL_TOKEN);
 
 const adapter = new SlackAdapter({
     // parameters used to secure webhook endpoint
