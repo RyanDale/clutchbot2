@@ -1,12 +1,13 @@
+require('dotenv').config();
+
 const Mixpanel = require('mixpanel');
 const { Botkit } = require('botkit');
 const { BotkitCMSHelper } = require('botkit-plugin-cms');
-
 const { SlackAdapter, SlackMessageTypeMiddleware, SlackEventMiddleware } = require('botbuilder-adapter-slack');
 const { MongoDbStorage } = require('botbuilder-storage-mongodb');
+const connectToDB = require('./utils/connectToDB');
 
-// Load process.env values from .env file
-require('dotenv').config();
+connectToDB();
 
 let storage = null;
 if (process.env.MONGO_URI) {

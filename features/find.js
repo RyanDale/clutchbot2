@@ -3,7 +3,7 @@ const getCardUrl = require('../utils/getCardUrl');
 
 module.exports = function (controller) {
     controller.on('slash_command', async (bot, message) => {
-        mixpanel.people.set(message.user_id, { $name: message.user_name });
+        global.mixpanel.people.set(message.user_id, { $name: message.user_name });
         if (message.command === '/find') {
             await find(bot, message);
         }
