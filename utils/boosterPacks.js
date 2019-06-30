@@ -179,11 +179,6 @@ const series1 = async () => {
     for (let i = 0; i < 15; i++) {
         pack.push(await _.invoke(series1PackBuilder, `card${15 - i}`, pack));
     }
-    const cards = await Card.find({
-        year: '2019',
-        series: 'Series 1'
-    });
-    console.log('pack', pack);
     return pack.reverse();
 }
 

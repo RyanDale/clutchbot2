@@ -23,6 +23,17 @@ const DraftSchema = new Schema({
         type: Date,
         default: Date.now,
         required: true
+    },
+    currentPack: {
+        type: Number,
+        default: 1
+    },
+    totalPacks: {
+        type: Number,
+        default: 1
+    },
+    currentPick: {
+        type: String
     }
 });
 
