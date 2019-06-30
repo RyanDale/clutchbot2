@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Card = require('./Card');
 const Schema = mongoose.Schema;
 
 const DraftSchema = new Schema({
@@ -16,7 +17,8 @@ const DraftSchema = new Schema({
     users: [
         {
             user_id: {type: String, required: true},
-            user_name: {type: String, required: true}
+            user_name: {type: String, required: true},
+            players: {type: [Card.schema]}
         }
     ],
     created: {
@@ -34,7 +36,8 @@ const DraftSchema = new Schema({
     },
     currentPick: {
         type: String
-    }
+    },
+    availablePlayers: [Card.schema]
 });
 
 module.exports = Draft = mongoose.model('Draft', DraftSchema);

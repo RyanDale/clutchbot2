@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const Draft = require('../models/Draft');
 const { series1 } = require('../utils/boosterPacks');
 const getCardUrl = require('../utils/getCardUrl');
@@ -27,6 +28,7 @@ module.exports = function (controller) {
         // This occurs when a card was selected
         if (action.action_id === 'draftPlayer') {
             const cardId = action.value.split('card/')[1];
+            await draftPlayer(bot, message, cardId);
         }
     });
 
@@ -48,7 +50,7 @@ module.exports = function (controller) {
                 return;
             }
             const draftTitle = 'Are you ready to begin? Once a draft has started, more players cannot be added.';
-            await bot.replyPrivate(message, {
+            await bot.replyPublic(message, {
                 "text": "Begin Draft",
                 "attachments": [
                     {
@@ -83,6 +85,15 @@ module.exports = function (controller) {
     async function openPack(bot, message) {
         const draft = await getDraft(message.channel);
         const boosterPack = await series1();
+
+        draft.availablePlayers = boosterPack;
+        await draft.save();
+        await renderPack(bot, message);
+    }
+
+    async function renderPack(bot, message, preface = '') {
+        const draft = await getDraft(message.channel);
+
         const formatText = (c, index) => {
             const space = () => `${index + 1}.${index + 1 < 10 ? '  ' : ''}`;
             const cardLink = `<${getCardUrl(c.name)}|${c.name}>`;
@@ -133,9 +144,8 @@ module.exports = function (controller) {
         const intro = {
             "type": "section",
             "text": {
-                "type": "plain_text",
-                "emoji": true,
-                "text": `Booster Pack (${draft.currentPack} of ${draft.totalPacks})`
+                "type": "mrkdwn",
+                "text": `${preface}Booster Pack (${draft.currentPack} of ${draft.totalPacks})`
             }
         };
         const currentPick = {
@@ -146,8 +156,34 @@ module.exports = function (controller) {
             }
         };
         await bot.replyPublic(message, {
-            blocks: [intro, ...boosterPack.map(formatCard), currentPick]
+            blocks: [intro, ...draft.availablePlayers.map(formatCard), currentPick]
         });
+    }
+
+    async function draftPlayer(bot, message, cardId) {
+        const draft = await getDraft(message.channel);
+        
+        if (draft.currentPick != message.user) {
+            return await bot.replyPrivate(message, `It is not your turn. <@${draft.currentPick}> is drafting!`);
+        }
+        
+        const drafted = draft.availablePlayers.find(card => card._id == cardId);
+        let draftIndex;
+        draft.users.forEach((user, index) => {
+            if (user.user_id === message.user) {
+                user.players = [...user.players, drafted];
+                draftIndex = index;
+            }
+        });
+        if (draftIndex + 1 >= draft.users.length) {
+            draftIndex = 0;
+        } else {
+            draftIndex ++;
+        }
+        draft.currentPick = draft.users[draftIndex].user_id;
+        draft.availablePlayers = draft.availablePlayers.filter(card => card._id != cardId);
+        await draft.save();
+        renderPack(bot, message, `<@${message.user}> selected ${drafted.name}.\n\n`);
     }
 
     async function getDraft(channel) {
