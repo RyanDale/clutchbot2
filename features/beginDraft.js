@@ -127,7 +127,7 @@ module.exports = function (controller) {
                         "text": {
                             "type": "plain_text",
                             "emoji": true,
-                            "text": `Pick ${card.name}`
+                            "text": `Pick`
                         },
                         "value": `card/${card._id}`,
                         action_id: 'draftPlayer'
@@ -164,7 +164,7 @@ module.exports = function (controller) {
         const draft = await getDraft(message.channel);
         
         if (draft.currentPick != message.user) {
-            return await bot.replyPrivate(message, `It is not your turn. <@${draft.currentPick}> is drafting!`);
+            return await bot.replyPublic(message, `It is not your turn. <@${draft.currentPick}> is drafting!`);
         }
         
         const drafted = draft.availablePlayers.find(card => card._id == cardId);
@@ -182,8 +182,23 @@ module.exports = function (controller) {
         }
         draft.currentPick = draft.users[draftIndex].user_id;
         draft.availablePlayers = draft.availablePlayers.filter(card => card._id != cardId);
-        await draft.save();
-        renderPack(bot, message, `<@${message.user}> selected ${drafted.name}.\n\n`);
+
+        // Continue with the draft as long as there are players in the pack
+        if (draft.availablePlayers.length) {
+            await draft.save();
+            renderPack(bot, message, `<@${message.user}> selected ${drafted.name}.\n\n`);
+        } else {
+            // We have more packs to open
+            if (draft.currentPack < draft.totalPacks) {
+                draft.currentPack += 1;
+                await draft.save();
+                openPack(bot, message);
+            } else {
+                bot.replyPublic(message,
+                    `<@${message.user}> selected ${drafted.name}.\n\nThe draft is complete! Run \`/draft_results\` to see all selections.`);
+            }
+            
+        }
     }
 
     async function getDraft(channel) {
