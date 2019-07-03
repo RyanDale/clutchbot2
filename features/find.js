@@ -16,10 +16,9 @@ module.exports = function (controller) {
         }
 
         const name = message.text;
-        const cardUrl = getCardUrl(name);
 
         try {
-            await axios.get(cardUrl);
+            const cardUrl = await getCardUrl(name);
             await respondWithCard(bot, message, name, cardUrl);
         } catch (error) {
             await cardNotFound(bot, message, name);

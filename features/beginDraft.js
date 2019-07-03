@@ -96,7 +96,7 @@ module.exports = function (controller) {
 
         const formatText = (c, index) => {
             const space = () => `${index + 1}.${index + 1 < 10 ? '  ' : ''}`;
-            const cardLink = `<${getCardUrl(c.name)}|${c.name}>`;
+            const cardLink = `<${await getCardUrl(c.name)}|${c.name}>`;
             if (c.cardType === 'Batter' || c.cardType === 'Pitcher') {
                 return `${space()} [*${c.rarity}*] ${cardLink} - ${c.position} - ${c.cmdOb.trim()} - $${c.salary}`;
             } else if (c.cardType === 'Strategy') {
