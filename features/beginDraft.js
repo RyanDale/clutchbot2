@@ -94,9 +94,10 @@ module.exports = function (controller) {
     async function renderPack(bot, message, preface = '') {
         const draft = await getDraft(message.channel);
 
-        const formatText = (c, index) => {
+        const formatText = async (c, index) => {
             const space = () => `${index + 1}.${index + 1 < 10 ? '  ' : ''}`;
-            const cardLink = `<${await getCardUrl(c.name)}|${c.name}>`;
+            const cardUrl = await getCardUrl(c.name);
+            const cardLink = `<${cardUrl}|${c.name}>`;
             if (c.cardType === 'Batter' || c.cardType === 'Pitcher') {
                 return `${space()} [*${c.rarity}*] ${cardLink} - ${c.position} - ${c.cmdOb.trim()} - $${c.salary}`;
             } else if (c.cardType === 'Strategy') {
@@ -106,13 +107,14 @@ module.exports = function (controller) {
             }
         };
 
-        const formatCard = (card, index) => {
+        const formatCard = async (card, index) => {
+            const formattedText = await formatText(card, index);
             if (card.picked) {
                 return {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": `~${formatText(card, index)}~`
+                        "text": `~${formattedText}~`
                     }
                 };
             } else {
@@ -120,7 +122,7 @@ module.exports = function (controller) {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": formatText(card, index)
+                        "text": formattedText
                     },
                     "accessory": {
                         "type": "button",
@@ -155,8 +157,9 @@ module.exports = function (controller) {
                 "text": `<@${draft.currentPick}> is currently on the clock.`
             }
         };
+        const players = Promise.all(await draft.availablePlayers.map(await formatCard))
         await bot.replyPublic(message, {
-            blocks: [intro, ...draft.availablePlayers.map(formatCard), currentPick]
+            blocks: [intro, ...players, currentPick]
         });
     }
 

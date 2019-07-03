@@ -27,9 +27,10 @@ module.exports = function (controller) {
                 boosterPack = await series1();
         }
 
-        const formatCard = (c, index) => {
+        const formatCard = async (c, index) => {
             const space = () => `${index + 1}.${index + 1 < 10 ? '  ' : ''}`;
-            const cardLink = `<${await getCardUrl(c.name)}|${c.name}>`;
+            const cardUrl = await getCardUrl(c.name);
+            const cardLink = `<${cardUrl}|${c.name}>`;
             if (c.cardType === 'Batter' || c.cardType === 'Pitcher') {
                 return `${space()} [*${c.rarity}*] ${cardLink} - ${c.position} - ${c.cmdOb.trim()} - $${c.salary}`;
             } else if (c.cardType === 'Strategy') {
@@ -39,6 +40,7 @@ module.exports = function (controller) {
             }
         };
 
-        bot.replyPublic(message, 'Booster Pack:\n' + boosterPack.map(formatCard).join('\n'));
+        const boosterCards = Promise.all(await boosterPack.map(await formatCard));
+        bot.replyPublic(message, 'Booster Pack:\n' + boosterCards.join('\n'));
     }
 }
