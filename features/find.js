@@ -27,6 +27,7 @@ module.exports = function (controller) {
 
     async function respondWithCard(bot, message, name, cardUrl) {
         const card = {
+            response_type: 'in_channel',
             attachments: [
                 {
                     fallback: name,
@@ -51,6 +52,9 @@ module.exports = function (controller) {
             success: false,
             distinct_id: message.user_id
         });
-        await bot.replyPublic(message, `Card with the name "${name}" not found!`);
+        await bot.replyPublic(message, {
+            response_type: 'in_channel',
+            text: `Card with the name "${name}" not found!`
+        });
     }
 }
