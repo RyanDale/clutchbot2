@@ -157,7 +157,7 @@ module.exports = function (controller) {
                 "text": `<@${draft.currentPick}> is currently on the clock.`
             }
         };
-        const players = Promise.all(await draft.availablePlayers.map(await formatCard))
+        const players = await Promise.all(await draft.availablePlayers.map(await formatCard))
         await bot.replyPublic(message, {
             blocks: [intro, ...players, currentPick]
         });
