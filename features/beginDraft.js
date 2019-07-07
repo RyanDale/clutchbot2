@@ -165,11 +165,11 @@ module.exports = function (controller) {
 
     async function draftPlayer(bot, message, cardId) {
         const draft = await getDraft(message.channel);
-        
+
         if (draft.currentPick != message.user) {
-            return await bot.replyPublic(message, `It is not your turn. <@${draft.currentPick}> is drafting!`);
+            return await bot.replyEphemeral(message, `It is not your turn. <@${draft.currentPick}> is drafting!`);
         }
-        
+
         const drafted = draft.availablePlayers.find(card => card._id == cardId);
         let draftIndex;
         draft.users.forEach((user, index) => {
@@ -181,7 +181,7 @@ module.exports = function (controller) {
         if (draftIndex + 1 >= draft.users.length) {
             draftIndex = 0;
         } else {
-            draftIndex ++;
+            draftIndex++;
         }
         draft.currentPick = draft.users[draftIndex].user_id;
         draft.availablePlayers = draft.availablePlayers.filter(card => card._id != cardId);
@@ -200,7 +200,7 @@ module.exports = function (controller) {
                 bot.replyPublic(message,
                     `<@${message.user}> selected ${drafted.name}.\n\nThe draft is complete! Run \`/draft_results\` to see all selections.`);
             }
-            
+
         }
     }
 

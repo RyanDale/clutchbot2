@@ -14,6 +14,6 @@ module.exports = async text => {
     if (cardUrl) {
         return cardUrl;
     } else {
-        throw new Error('Card not found!');
+        throw new Error(`Card not found! ${cardUrls[0]}/${fileName}.png`);
     }
 };
