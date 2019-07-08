@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const Draft = require('../models/Draft');
 const { series1 } = require('../utils/boosterPacks');
-const getCardUrl = require('../utils/getCardUrl');
+const formatText = require('../utils/formatText');
 
 module.exports = function (controller) {
     controller.on('slash_command', async (bot, message) => {
@@ -91,22 +91,8 @@ module.exports = function (controller) {
         await renderPack(bot, message);
     }
 
-    async function renderPack(bot, message, preface = '') {
+async function renderPack(bot, message, preface = '') {
         const draft = await getDraft(message.channel);
-
-        const formatText = async (c, index) => {
-            const space = () => `${index + 1}.${index + 1 < 10 ? '  ' : ''}`;
-            const cardUrl = await getCardUrl(c.name);
-            const cardLink = `<${cardUrl}|${c.name}>`;
-            if (c.cardType === 'Batter' || c.cardType === 'Pitcher') {
-                return `${space()} [*${c.rarity}*] ${cardLink} - ${c.position} - ${c.cmdOb.trim()} - $${c.salary}`;
-            } else if (c.cardType === 'Strategy') {
-                return `${space()} [*${c.rarity}*] ${cardLink} - ${c.position}`;
-            } else if (c.cardType === 'Stadium') {
-                return `${space()} [*${c.rarity}*] ${cardLink}`;
-            }
-        };
-
         const formatCard = async (card, index) => {
             const formattedText = await formatText(card, index);
             if (card.picked) {
