@@ -22,9 +22,14 @@ module.exports = function (controller) {
     });
 
     async function createDraft(bot, message) {
-        if (message.text === "" || message.text === "help") {
+        if (message.text === "help") {
             bot.replyPrivate(message, "Start a Clutch draft");
             return;
+        }
+
+        if (message.text === "") {
+            return await bot.replyPrivate(message,
+                'A name is required when creating a draft. Run `/create_draft Draft_Name_Here`.');
         }
 
         const activeDraft = await Draft.findOne({
