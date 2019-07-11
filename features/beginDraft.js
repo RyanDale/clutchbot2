@@ -183,6 +183,7 @@ async function renderPack(bot, message, preface = '') {
                 await draft.save();
                 openPack(bot, message);
             } else {
+                await draft.save();
                 bot.replyPublic(message,
                     `<@${message.user}> selected ${drafted.name}.\n\nThe draft is complete! Run \`/draft_results\` to see all selections.`);
             }
