@@ -44,7 +44,7 @@ module.exports = function (controller) {
                 }
             }))];
         })[0];
-        await bot.replyPrivate(message, { blocks });
+        await bot.replyPublic(message, { blocks });
     }
 
     async function renderTeam(user) {
