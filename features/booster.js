@@ -18,13 +18,16 @@ module.exports = function (controller) {
 
         const series = message.text.toLowerCase();
         let boosterPack;
+        let boosterLabel;
 
         switch (series) {
             case 's2':
                 boosterPack = await series2();
+                boosterLabel = '2019 Series 2 Booster Pack';
                 break;
             default:
                 boosterPack = await series1();
+                boosterLabel = '2019 Series 1 Booster Pack';
         }
 
         const formatCard = async (c, index) => {
@@ -45,6 +48,6 @@ module.exports = function (controller) {
         };
 
         const boosterCards = await Promise.all(await boosterPack.map(await formatCard));
-        bot.replyPublic(message, 'Booster Pack:\n' + boosterCards.join('\n'));
+        bot.replyPublic(message, `*${boosterLabel}*\n${boosterCards.join('\n')}`);
     }
 }
