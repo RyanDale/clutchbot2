@@ -22,25 +22,14 @@ const series2PackBuilder = {
             // Generate a LE1
             limitedEdition = 'LE1';
         }
-        let extraConfig;
+        let extraConfig = {};
         if (limitedEdition) {
-            extraConfig = {
-                cardType: {
-                    '$in': ['Batter', 'Pitcher']
-                },
-                cardNumber: { $nin: _.times(20, index => `I${(index + 1)}`) },
-                rarity: {
-                    '$in': ['UR', 'R']
-                }
-            };
-        } else {
-            extraConfig = {
-                rarity: 'UR'
-            };
+            extraConfig.cardNumber = { $nin: _.times(20, index => `I${(index + 1)}`) };
         }
         const card = await getCard({
             year: '2019',
             series: 'Series 2',
+            rarity: 'UR',
             ...extraConfig
         });
 
@@ -55,12 +44,6 @@ const series2PackBuilder = {
     //    ** IF AN LE9 or LE1 CARD WAS CHOSEN FOR CARD 15 then this spot is SKIPPED in the pack build and card 0 is added at the end.
     async card14(pack) {
         let cardTypes = ['Pitcher', 'Stadium', 'Strategy'];
-
-        // If the previous card was a limited edition, skip this pick.
-        // If skipped, this pick will be replaced with a selection from card 15.
-        if (pack[0].limitedEdition) {
-            return;
-        }
         return await getCard({
             year: '2019',
             series: 'Series 2',
@@ -79,7 +62,7 @@ const series2PackBuilder = {
         // Check if card 14 exists and was a pitcher
         if (pack[1] && pack[1].cardType === 'Pitcher') {
             cardTypes = ['Batter'];
-        } else if (pack[0].limitedEdition && pack[0].cardType === 'Batter') {
+        } else if (pack[1] && pack[1].cardType === 'Batter') {
             cardTypes = ['Pitcher'];
         } else {
             cardTypes = ['Batter', 'Pitcher'];
@@ -190,9 +173,11 @@ const series2PackBuilder = {
         return await this.card4(pack);
     },
 
+    // card0 is DEPRECATED
     // Card 0 – IF CARD 13 WAS SKIPPED – One random common from 90 cards
     //    (removing cards 8, 7, 6, 5, 4, 3, 2 and 1 from the possibilities)
     async card0(pack) {
+        throw new Error('This method should not be called.');
         // pack[1] = Card 14
         // This means a LE has been picked, we do not need to make a selection here
         if (pack[1]) {
@@ -209,7 +194,7 @@ const series2PackBuilder = {
 
 const series2 = async () => {
     let pack = [];
-    for (let i = 0; i <= 15; i++) {
+    for (let i = 0; i < 15; i++) {
         pack.push(await _.invoke(series2PackBuilder, `card${15 - i}`, pack));
     }
     return pack.filter(card => card).reverse();
