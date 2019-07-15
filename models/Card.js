@@ -44,7 +44,11 @@ const CardSchema = new Schema({
         type: Date,
         default: Date.now,
         required: true
-    }
+    },
+    limitedEdition: {
+        type: String,
+        default: ''
+    },
 });
 
 module.exports = Card = mongoose.model('Card', CardSchema);
