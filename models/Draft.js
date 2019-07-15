@@ -37,7 +37,8 @@ const DraftSchema = new Schema({
     currentPick: {
         type: String
     },
-    availablePlayers: [Card.schema]
+    availablePlayers: [Card.schema],
+    packOrder: [{ type: String }]
 });
 
 module.exports = Draft = mongoose.model('Draft', DraftSchema);

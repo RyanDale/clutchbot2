@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const Draft = require('../models/Draft');
 const { series1 } = require('../utils/boosterPacks');
+const { series2 } = require('../utils/series2');
 const formatText = require('../utils/formatText');
 
 module.exports = function (controller) {
@@ -41,7 +42,15 @@ module.exports = function (controller) {
         const activeDraft = await Draft.findOne({
             isActive: true,
             channel: message.channel
-        }).select("users").lean();
+        });
+        const userCount = activeDraft.users.length;
+        const packOrder = message.text.split(',').map(pack => pack.trim()).map(pack => _.times(userCount, () => pack)).flat();
+        if (!packOrder || !packOrder[0]) {
+            activeDraft.packOrder = [..._.times(userCount, () => 's1'), ..._.times(userCount, () => 's1'), ..._.times(userCount, () => 's2')];
+        } else {
+            activeDraft.packOrder = packOrder;
+        }
+        await activeDraft.save();
 
         if (activeDraft) {
             if (!activeDraft.users.length) {
@@ -84,14 +93,24 @@ module.exports = function (controller) {
 
     async function openPack(bot, message) {
         const draft = await getDraft(message.channel);
-        const boosterPack = await series1();
+        const packSeries = draft.packOrder[draft.currentPack - 1].toLowerCase();
+        let boosterPack;
+
+        if (packSeries === 's1' || packSeries === 'series 1') {
+            boosterPack = await series1();
+        } else if (packSeries === 's2' || packSeries === 'series 2') {
+            boosterPack = await series2();
+        } else {
+            // Fallback to s1
+            boosterPack = await series1();
+        }
 
         draft.availablePlayers = boosterPack;
         await draft.save();
         await renderPack(bot, message);
     }
 
-async function renderPack(bot, message, preface = '') {
+    async function renderPack(bot, message, preface = '') {
         const draft = await getDraft(message.channel);
         const formatCard = async (card, index) => {
             const formattedText = await formatText(card, index);
@@ -133,7 +152,7 @@ async function renderPack(bot, message, preface = '') {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": `${preface}Booster Pack (${draft.currentPack} of ${draft.totalPacks})`
+                "text": `${preface}*${draft.packOrder[draft.currentPack - 1].toUpperCase()} Booster Pack (${draft.currentPack} of ${draft.totalPacks})*`
             }
         };
         const currentPick = {
