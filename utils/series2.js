@@ -28,7 +28,7 @@ const series2PackBuilder = {
                 cardType: {
                     '$in': ['Batter', 'Pitcher']
                 },
-                cardNumber: { $nin: _.times(20, index => `l${(index + 1)}`) },
+                cardNumber: { $nin: _.times(20, index => `I${(index + 1)}`) },
                 rarity: {
                     '$in': ['UR', 'R']
                 }
@@ -44,6 +44,9 @@ const series2PackBuilder = {
             ...extraConfig
         });
 
+        if (_.times(10, index => `I${(index + 1)}`).includes(card.cardNumber)) {
+            card.name = `ASG ${card.name}`;
+        }
         card.limitedEdition = limitedEdition;
         return card;
     },
