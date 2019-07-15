@@ -1,4 +1,5 @@
 const { series1 } = require('../utils/boosterPacks');
+const { series2 } = require('../utils/series2');
 const getCardUrl = require('../utils/getCardUrl');
 
 module.exports = function (controller) {
@@ -15,13 +16,12 @@ module.exports = function (controller) {
             return;
         }
 
-        const series = message.text;
+        const series = message.text.toLowerCase();
         let boosterPack;
 
         switch (series) {
-            case 'Series 2':
-                // TODO: Implement Series 2 logic once available
-                boosterPack = [];
+            case 's2':
+                boosterPack = await series2();
                 break;
             default:
                 boosterPack = await series1();
@@ -29,8 +29,12 @@ module.exports = function (controller) {
 
         const formatCard = async (c, index) => {
             const space = () => `${index + 1}.${index + 1 < 10 ? '  ' : ''}`;
-            const cardUrl = await getCardUrl(c.name);
-            const cardLink = `<${cardUrl}|${c.name}>`;
+            let cardUrl;
+            try {
+                cardUrl = await getCardUrl(c.name, c.limitedEdition);
+            } catch {}
+
+            const cardLink = cardUrl ? `<${cardUrl}|${c.name}>` : c.name;
             if (c.cardType === 'Batter' || c.cardType === 'Pitcher') {
                 return `${space()} [*${c.rarity}*] ${cardLink} - ${c.position} - ${c.cmdOb.trim()} - $${c.salary}`;
             } else if (c.cardType === 'Strategy') {
@@ -40,7 +44,7 @@ module.exports = function (controller) {
             }
         };
 
-        const boosterCards = Promise.all(await boosterPack.map(await formatCard));
+        const boosterCards = await Promise.all(await boosterPack.map(await formatCard));
         bot.replyPublic(message, 'Booster Pack:\n' + boosterCards.join('\n'));
     }
 }
