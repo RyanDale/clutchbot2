@@ -1,6 +1,9 @@
 const axios = require('axios');
 
-module.exports = async text => {
+module.exports = async (text, limitedEdition) => {
+    if (limitedEdition) {
+        text = limitedEdition + text;
+    }
     const fileName = text.replace(/[^a-z0-9+]+/gi, '').toLowerCase();
     const cardUrls = process.env.CARD_URL.split(',');
     let cardUrl = '';
