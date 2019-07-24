@@ -38,14 +38,13 @@ module.exports = function (controller) {
             bot.replyPrivate(message, "Begin a Clutch draft");
             return;
         }
-        await bot.httpBody({ text: 'Loading Draft...' });
 
         const activeDraft = await Draft.findOne({
             isActive: true,
             channel: message.channel
         });
         const userCount = activeDraft.users.length;
-        const packOrder = message.text.split(',').map(pack => pack.trim()).map(pack => _.times(userCount, () => pack)).flat();
+        const packOrder = _.flatten(message.text.split(',').map(pack => pack.trim()).map(pack => _.times(userCount, () => pack)));
         if (!packOrder || !packOrder[0]) {
             activeDraft.packOrder = [..._.times(userCount, () => 's1'), ..._.times(userCount, () => 's1'), ..._.times(userCount, () => 's2')];
         } else {
