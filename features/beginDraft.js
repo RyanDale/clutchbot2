@@ -38,6 +38,7 @@ module.exports = function (controller) {
             bot.replyPrivate(message, "Begin a Clutch draft");
             return;
         }
+        bot.httpBody({ text: 'Loading Draft...' });
 
         const activeDraft = await Draft.findOne({
             isActive: true,
