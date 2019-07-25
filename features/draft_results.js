@@ -21,6 +21,12 @@ module.exports = function (controller) {
             isActive: true
         });
 
+        if (!draft) {
+            await bot.replyPrivate(message,
+                "No active draft exists in this channel. Run `/create_draft Draft Name` to start a draft.");
+            return;
+        }
+
         const rend = await Promise.all(draft.users
             .filter(user => user.user_id === message.user)
             .map(async user => ({

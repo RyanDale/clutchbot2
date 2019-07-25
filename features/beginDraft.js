@@ -43,6 +43,13 @@ module.exports = function (controller) {
             isActive: true,
             channel: message.channel
         });
+
+        if (!activeDraft) {
+            await bot.replyPrivate(message,
+                "No active draft exists in this channel. Run `/create_draft Draft Name` to start a draft.");
+            return;
+        }
+
         const userCount = activeDraft.users.length;
         const packOrder = _.flatten(message.text.split(',').map(pack => pack.trim()).map(pack => _.times(userCount, () => pack)));
         if (!packOrder || !packOrder[0]) {

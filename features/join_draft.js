@@ -19,6 +19,13 @@ module.exports = function (controller) {
             channel,
             isActive: true
         });
+
+        if (!draft) {
+            await bot.replyPrivate(message,
+                "No active draft exists in this channel. Run `/create_draft Draft Name` to start a draft.");
+            return;
+        }
+
         if (draft.users.find(user => user.user_id === user_id)) {
             bot.replyPrivate(message, `You have already joined the ${draft.name} draft!`);
         } else {
