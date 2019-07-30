@@ -169,10 +169,36 @@ module.exports = function (controller) {
                 "text": `<@${draft.currentPick}> is currently on the clock.`
             }
         };
-        const players = await Promise.all(await draft.availablePlayers.map(await formatCard))
-        await bot.replyPublic(message, {
-            blocks: [intro, ...players, currentPick]
-        });
+        const players = await Promise.all(await draft.availablePlayers.map(await formatCard));
+
+        // New pack has been opened and this is not the first pack.
+        if (draft.availablePlayers.length === 15 && draft.currentPack > 1) {
+            const cleanIntro = {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": `*${draft.packOrder[draft.currentPack - 1].toUpperCase()} Booster Pack (${draft.currentPack - 1} of ${draft.totalPacks})*`
+                }
+            };
+            const packInfo = {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: 'All cards in this pack have been selected.'
+                }
+            }
+            await bot.replyPublic(message, {
+                blocks: [cleanIntro, packInfo]
+            });
+            await bot.startConversationInChannel(message.channel, message.user);
+            await bot.say({
+                blocks: [intro, ...players, currentPick]
+            });
+        } else {
+            bot.replyPublic(message, {
+                blocks: [intro, ...players, currentPick]
+            });
+        }
     }
 
     async function draftPlayer(bot, message, cardId) {
