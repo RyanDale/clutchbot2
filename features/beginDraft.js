@@ -7,13 +7,13 @@ const formatText = require('../utils/formatText');
 module.exports = function (controller) {
     controller.on('slash_command', async (bot, message) => {
         global.mixpanel.people.set(message.user_id, { $name: message.user_name });
-        if (message.command === '/begin_draft') {
-            await beginDraft(bot, message);
+        if (message.command === '/start_draft') {
+            await startDraft(bot, message);
         }
     });
 
     controller.on('interactive_message', async (bot, message) => {
-        if (message.incoming_message.channelData.callback_id === 'beginDraftChoice') {
+        if (message.incoming_message.channelData.callback_id === 'startDraftChoice') {
             if (message.actions[0].name === 'Yes') {
                 const activeDraft = await getDraft(message.channel);
                 activeDraft.totalPacks = activeDraft.users.length * 3;
@@ -33,9 +33,9 @@ module.exports = function (controller) {
         }
     });
 
-    async function beginDraft(bot, message) {
+    async function startDraft(bot, message) {
         if (message.text === "help") {
-            bot.replyPrivate(message, "Begin a Clutch draft");
+            bot.replyPrivate(message, "Start a Clutch draft");
             return;
         }
 
@@ -46,7 +46,7 @@ module.exports = function (controller) {
 
         if (!activeDraft) {
             await bot.replyPrivate(message,
-                "No active draft exists in this channel. Run `/create_draft Draft Name` to start a draft.");
+                "No active draft exists in this channel. Run `/setup_draft Draft Name` to start a draft.");
             return;
         }
 
@@ -62,17 +62,17 @@ module.exports = function (controller) {
         if (activeDraft) {
             if (!activeDraft.users.length) {
                 bot.replyPrivate(message,
-                    "No players in the draft! Players must join via `/join_draft` before you can begin the draft.");
+                    "No players in the draft! Players must join via `/join_draft` before you can start the draft.");
                 return;
             }
-            const draftTitle = 'Are you ready to begin? Once a draft has started, more players cannot be added.';
+            const draftTitle = 'Are you ready to start? Once a draft has started, more players cannot be added.';
             await bot.replyPublic(message, {
-                "text": "Begin Draft",
+                "text": "Start Draft",
                 "attachments": [
                     {
                         "fallback": draftTitle,
                         "title": draftTitle,
-                        "callback_id": `beginDraftChoice`,
+                        "callback_id": `startDraftChoice`,
                         "color": "#3AA3E3",
                         "attachment_type": "default",
                         "actions": [
@@ -94,7 +94,7 @@ module.exports = function (controller) {
             });
         } else {
             bot.replyPrivate(message,
-                "No active draft! You must create a new draft (`/create_draft`) and have players join before you can begin it.");
+                "No active draft! You must setup a new draft (`/setup_draft`) and have players join before you can start it.");
         }
     }
 

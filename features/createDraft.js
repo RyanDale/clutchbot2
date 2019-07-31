@@ -3,14 +3,14 @@ const Draft = require('../models/Draft');
 module.exports = function (controller) {
     controller.on('slash_command', async (bot, message) => {
         global.mixpanel.people.set(message.user_id, { $name: message.user_name });
-        if (message.command === '/create_draft') {
-            await createDraft(bot, message);
+        if (message.command === '/setup_draft') {
+            await setupDraft(bot, message);
         }
     });
 
     controller.on('interactive_message', async (bot, message) => {
-        if (message.incoming_message.channelData.callback_id === 'createDraftChoice') {
-            if (message.actions[0].name === 'Create Draft') {
+        if (message.incoming_message.channelData.callback_id === 'setupDraftChoice') {
+            if (message.actions[0].name === 'Setup Draft') {
                 await Draft.findOneAndUpdate({
                     isActive: true,
                     channel: message.channel
@@ -21,7 +21,7 @@ module.exports = function (controller) {
 
     });
 
-    async function createDraft(bot, message) {
+    async function setupDraft(bot, message) {
         if (message.text === "help") {
             bot.replyPrivate(message, "Start a Clutch draft");
             return;
@@ -29,7 +29,7 @@ module.exports = function (controller) {
 
         if (message.text === "") {
             return await bot.replyPrivate(message,
-                'A name is required when creating a draft. Run `/create_draft Draft_Name_Here`.');
+                'A name is required when creating a draft. Run `/setup_draft Draft_Name_Here`.');
         }
 
         const activeDraft = await Draft.findOne({
@@ -38,20 +38,20 @@ module.exports = function (controller) {
         }).select("name").lean();
 
         if (activeDraft) {
-            const draftTitle = `Would you like to create a new draft and archive "${activeDraft.name}"?`;
+            const draftTitle = `Would you like to setup a new draft and archive "${activeDraft.name}"?`;
             await bot.replyPrivate(message, {
                 "text": "Active draft already exists",
                 "attachments": [
                     {
                         "fallback": draftTitle,
                         "title": draftTitle,
-                        "callback_id": `createDraftChoice`,
+                        "callback_id": `setupDraftChoice`,
                         "color": "#3AA3E3",
                         "attachment_type": "default",
                         "actions": [
                             {
-                                "name": "Create Draft",
-                                "text": "Create Draft",
+                                "name": "Setup Draft",
+                                "text": "Setup Draft",
                                 "type": "button",
                                 "value": `${message.text}`
                             },
@@ -78,6 +78,6 @@ module.exports = function (controller) {
         });
 
         await draft.save().then(draft =>
-            bot.replyPublic(message, `Draft Created: ${draft.name}. Type \`/join_draft\` to enter the draft.`));
+            bot.replyPublic(message, `Draft Setup: ${draft.name}. Type \`/join_draft\` to enter the draft.`));
     }
 }

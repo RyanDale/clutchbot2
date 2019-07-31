@@ -22,7 +22,7 @@ module.exports = function (controller) {
 
         if (!draft) {
             await bot.replyPrivate(message,
-                "No active draft exists in this channel. Run `/create_draft Draft Name` to start a draft.");
+                "No active draft exists in this channel. Run `/setup_draft Draft Name` to start a draft.");
             return;
         }
 
