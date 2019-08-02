@@ -52,7 +52,7 @@ module.exports = function (controller) {
     }
 
     function renderTeam(user) {
-        const headers = ['#', 'Name', 'Rarity', 'Series', 'Position', 'CMD/OBP', 'Salary'].join(', ');
+        const headers = ['Round', 'Name', 'Rarity', 'Series', 'Position', 'CMD/OBP', 'Salary'].join(', ');
         const players = user.players.map((player, index) => commaSeparate(player, index)).join(',\n');
         return `${headers},\n${players}`;
     }
